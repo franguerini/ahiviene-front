@@ -15,7 +15,6 @@ export class HomePage {
   @ViewChild('map') mapElement: ElementRef;
   map: any;
   busNumber: any;
-  storage: any;
   latLng: any;
  
   constructor(public navCtrl: NavController, public geolocation: Geolocation, public storage: Storage) {
