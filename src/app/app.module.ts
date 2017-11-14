@@ -1,12 +1,14 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicStorageModule } from '@ionic/storage';
 import { MyApp } from './app.component';
 
 
 import { LineasPage } from '../pages/lineas/lineas';
 import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
+import { BusPage } from '../pages/bus/bus';
 import { TabsPage } from '../pages/tabs/tabs';
 
 
@@ -20,11 +22,13 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     LineasPage,
     ContactPage,
     HomePage,
+    BusPage,
     TabsPage
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -32,6 +36,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     LineasPage,
     ContactPage,
     HomePage,
+    BusPage,
     TabsPage
   ],
   providers: [
