@@ -38,7 +38,6 @@ export class LineasPage {
 	}
 
 	goToBus(busNumber, public navCtrl: NavController) {
-		console.log(busNumber);
 		this.navCtrl.push(BusPage, {
 			busNumber: busNumber
 		});

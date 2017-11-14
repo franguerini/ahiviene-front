@@ -14,8 +14,9 @@ export class HomePage {
  
   @ViewChild('map') mapElement: ElementRef;
   map: any;
-  busNumber: number;
+  busNumber: any;
   storage: any;
+  latLng: any;
  
   constructor(public navCtrl: NavController, public geolocation: Geolocation, public storage: Storage) {
     this.storage = storage;  
@@ -24,31 +25,39 @@ export class HomePage {
   ionViewDidLoad(){
     this.loadMap();
   }
+
+  ionViewWillEnter(){
+      this.storage.get('busNumber').then((val) => {
+        if(val) {
+          this.busNumber = val.toString();
+        } else {
+          this.busNumber = "A pie";
+        }
+      });
+      console.log(this.busNumber);
+      var marker = new google.maps.Marker({
+        position: this.latLng,
+        map: this.map,
+        label: this.busNumber
+      });
+
+  }
  
   loadMap(){
  
-
     this.geolocation.getCurrentPosition().then((position) => {
  
-      let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+      this.latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  
       let mapOptions = {
-        center: latLng,
+        center: this.latLng,
         zoom: 15,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       }
  
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
-      this.storage.get('busNumber').then((val) => {
-        this.busNumber = val;
-      });
-
-      var marker = new google.maps.Marker({
-        position: latLng,
-        map: this.map,
-        label: this.busNumber
-      });
+      this.ionViewWillEnter();
  
     }, (err) => {
       console.log(err);

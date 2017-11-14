@@ -16,7 +16,7 @@ import { Storage } from '@ionic/storage';
   templateUrl: 'bus.html',
 })
 export class BusPage {
-
+  busNumber: any;
   constructor(public navCtrl: NavController, public navParams: NavParams, private storage: Storage) {
   	this.busNumber = navParams.get('busNumber');
   	storage.ready().then(() => {
