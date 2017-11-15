@@ -18,7 +18,8 @@ export class HomePage {
   latLng: any;
  
   constructor(public navCtrl: NavController, public geolocation: Geolocation, public storage: Storage) {
-    this.storage = storage;  
+    this.storage = storage; 
+    this.navCtrl = navCtrl; 
   }
  
   ionViewDidLoad(){
@@ -34,7 +35,7 @@ export class HomePage {
         }
       });
       console.log(this.busNumber);
-      var marker = new google.maps.Marker({
+      new google.maps.Marker({
         position: this.latLng,
         map: this.map,
         label: this.busNumber

@@ -12,7 +12,7 @@ export class LineasPage {
 
 	lineas = this.getLineas();
 	constructor(public navCtrl: NavController) {
-	  	
+		this.navCtrl = navCtrl;
 	}
 
 	getLineas(){
@@ -37,7 +37,7 @@ export class LineasPage {
 		return items;
 	}
 
-	goToBus(busNumber, public navCtrl: NavController) {
+	goToBus(busNumber) {
 		this.navCtrl.push(BusPage, {
 			busNumber: busNumber
 		});

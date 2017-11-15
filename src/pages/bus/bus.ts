@@ -18,10 +18,9 @@ import { Storage } from '@ionic/storage';
 export class BusPage {
   busNumber: any;
   constructor(public navCtrl: NavController, public navParams: NavParams, private storage: Storage) {
+  	this.storage = storage;
   	this.busNumber = navParams.get('busNumber');
-  	storage.ready().then(() => {
-	  	storage.set('busNumber', this.busNumber);
-	});
+	this.storage.set('busNumber', this.busNumber);
   }
 
   ionViewDidLoad() {
