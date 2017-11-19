@@ -2,7 +2,10 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Storage } from '@ionic/storage';
-import { HTTP } from '@ionic-native/http';
+import { Http } from '@angular/http';
+import {Headers} from '@angular/http';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/map';
 
 
  
@@ -20,7 +23,32 @@ export class HomePage {
   latLng: any;
   markers: any = [];
  
-  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public http: HTTP) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public http: Http) {
+
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+
+    this.geolocation.getCurrentPosition().then((position) => {
+
+      var data = {
+        id : 1,
+        Lat : position.coords.latitude,
+        Lng: position.coords.longitude
+      };
+
+      this.http.post("http://ahiviene.herokuapp.com/users/update", JSON.stringify(data), { headers: headers }).do(res => res.json()).subscribe(
+      
+        data => {
+               console.log(data);
+          },
+        err => {
+               console.log(err);
+         }
+      );
+    }, (err) => {
+      console.log(err);
+    }); 
+    
   }
  
   ionViewDidLoad(){
@@ -29,16 +57,10 @@ export class HomePage {
 
 
   ionViewWillEnter(){
-    this.http.get('http://httpbin.org/ip', {}, {}).then(data => {
 
-      console.log(data);
-
-      this.busNumber = (data.origin.toString());
-
-      this.deleteMarkers();
-      this.storage.get('busNumber').then((value) => {
+     this.storage.get('busNumber').then((value) => {
         if(value) {
-          // this.busNumber = value.toString();
+          this.busNumber = value.toString();
           let marker = new google.maps.Marker({
             position: this.latLng,
             label: this.busNumber
@@ -47,12 +69,6 @@ export class HomePage {
           this.markers.push(marker);
         }
       });
-
-    }).catch(error => {
-
-    console.log(error);
-
-  });;
 
     
   }

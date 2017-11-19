@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { BusPage } from '../bus/bus';
-
+import { Http } from '@angular/http';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/map';
 
 
 @Component({
@@ -11,30 +13,22 @@ import { BusPage } from '../bus/bus';
 export class LineasPage {
 
 	lineas = this.getLineas();
-	constructor(public navCtrl: NavController) {
+	constructor(public navCtrl: NavController, public http: Http) {
 		this.navCtrl = navCtrl;
 	}
 
 	getLineas(){
-		var bus130 = {
-			number: 130,
-			color: 'yellow'
-		};
-		var bus61 = {
-			number: 61,
-			color: 'red'
-		};
-		var bus152 = {
-			number: 152,
-			color: 'blue'
-		}
+		
+   		this.http.get("http://ahiviene.herokuapp.com/bus_lines").do(res => res.json()).subscribe(
+                data => {
+                    console.log(data);
+                },
+                err => {
+                    console.log(err);
+                },
+            );
 
-		var items = [
-			bus130,
-			bus61,
-			bus152
-		];
-		return items;
+		// return items;
 	}
 
 	goToBus(busNumber) {
