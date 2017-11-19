@@ -2,6 +2,8 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Storage } from '@ionic/storage';
+import { HTTP } from '@ionic-native/http';
+
 
  
 declare var google;
@@ -18,7 +20,7 @@ export class HomePage {
   latLng: any;
   markers: any = [];
  
-  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public http: HTTP) {
   }
  
   ionViewDidLoad(){
@@ -27,24 +29,38 @@ export class HomePage {
 
 
   ionViewWillEnter(){
-    this.deleteMarkers();
-      this.storage.get('busNumber').then((value) => {
-        this.busNumber = value.toString();
-        let marker = new google.maps.Marker({
-          position: this.latLng,
-          label: value.toString()
-        });
-        marker.setMap(this.map);
-        this.markers.push(marker);
-      });
-      
+    this.http.get('http://httpbin.org/ip', {}, {}).then(data => {
 
+      console.log(data);
+
+      this.busNumber = (data.origin.toString());
+
+      this.deleteMarkers();
+      this.storage.get('busNumber').then((value) => {
+        if(value) {
+          // this.busNumber = value.toString();
+          let marker = new google.maps.Marker({
+            position: this.latLng,
+            label: this.busNumber
+          });
+          marker.setMap(this.map);
+          this.markers.push(marker);
+        }
+      });
+
+    }).catch(error => {
+
+    console.log(error);
+
+  });;
+
+    
   }
  
   loadMap(){
  
     this.geolocation.getCurrentPosition().then((position) => {
- 
+
       this.latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  
       let mapOptions = {
@@ -70,9 +86,10 @@ export class HomePage {
   getOffBus(){
     this.busNumber = 'A pie';
 
-    this.storage.set('busNumber', this.busNumber);
+    this.storage.set('busNumber', this.busNumber).then( () => {
+      this.ionViewWillEnter();
+    });
 
-    this.ionViewWillEnter();
 
   }
  
