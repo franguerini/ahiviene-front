@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Storage } from '@ionic/storage';
 
@@ -16,30 +16,28 @@ export class HomePage {
   map: any;
   busNumber: any;
   latLng: any;
+  markers: any = [];
  
-  constructor(public navCtrl: NavController, public geolocation: Geolocation, public storage: Storage) {
-    this.storage = storage; 
-    this.navCtrl = navCtrl; 
+  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage) {
   }
  
   ionViewDidLoad(){
     this.loadMap();
   }
 
+
   ionViewWillEnter(){
-      this.storage.get('busNumber').then((val) => {
-        if(val) {
-          this.busNumber = val.toString();
-        } else {
-          this.busNumber = "A pie";
-        }
+    this.deleteMarkers();
+      this.storage.get('busNumber').then((value) => {
+        this.busNumber = value.toString();
+        let marker = new google.maps.Marker({
+          position: this.latLng,
+          label: value.toString()
+        });
+        marker.setMap(this.map);
+        this.markers.push(marker);
       });
-      console.log(this.busNumber);
-      new google.maps.Marker({
-        position: this.latLng,
-        map: this.map,
-        label: this.busNumber
-      });
+      
 
   }
  
@@ -57,6 +55,10 @@ export class HomePage {
  
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
+      this.busNumber = 'A pie';
+
+      this.storage.set('busNumber', this.busNumber);
+
       this.ionViewWillEnter();
  
     }, (err) => {
@@ -64,5 +66,24 @@ export class HomePage {
     });
  
   }
+
+  getOffBus(){
+    this.busNumber = 'A pie';
+
+    this.storage.set('busNumber', this.busNumber);
+
+    this.ionViewWillEnter();
+
+  }
  
+  deleteMarkers() {
+        this.setMapOnAll(null);
+        this.markers = [];
+  }
+
+  setMapOnAll(map) {
+    for (var i = 0; i < this.markers.length; i++) {
+      this.markers[i].setMap(map);
+    }
+  }
 }

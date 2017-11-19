@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
+
 
 
 /**
@@ -16,14 +17,27 @@ import { Storage } from '@ionic/storage';
   templateUrl: 'bus.html',
 })
 export class BusPage {
+
   busNumber: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, private storage: Storage) {
-  	this.storage = storage;
+  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public storage: Storage) {
   	this.busNumber = navParams.get('busNumber');
-	this.storage.set('busNumber', this.busNumber);
   }
 
-  ionViewDidLoad() {
 
+  enterBus() {
+    let alert = this.alertCtrl.create({
+      title: 'Te subiste al ' + this.busNumber,
+      subTitle: 'Estas compartiendo la ubicacion a la comunidad, no olvides avisar cuando te bajes.',
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            this.storage.set('busNumber', this.busNumber);
+          }
+        }
+        ]
+    });
+    alert.present();
   }
+
 }

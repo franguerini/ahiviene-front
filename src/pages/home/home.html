@@ -8,4 +8,6 @@
  
 <ion-content>
   <div #map id="map"></div> 
+  <button ion-button (click)="getOffBus()" *ngIf="this.busNumber != 'A pie'" style="position: absolute; bottom: 0; right: 10%;">Bajarse</button>
+
 </ion-content>
