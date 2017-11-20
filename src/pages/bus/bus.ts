@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
 
+import { Http , RequestOptions} from '@angular/http';
+import {Headers} from '@angular/http';
+
 
 
 /**
@@ -18,26 +21,46 @@ import { Storage } from '@ionic/storage';
 })
 export class BusPage {
 
-  busNumber: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public storage: Storage) {
-  	this.busNumber = navParams.get('busNumber');
+  bus: any;
+  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public storage: Storage, public http: Http) {
+  	this.bus = navParams.get('bus');
   }
 
 
   enterBus() {
-    let alert = this.alertCtrl.create({
-      title: 'Te subiste al ' + this.busNumber,
-      subTitle: 'Estas compartiendo la ubicacion a la comunidad, no olvides avisar cuando te bajes.',
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.storage.set('busNumber', this.busNumber);
-          }
-        }
-        ]
-    });
-    alert.present();
+
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    let options = new RequestOptions({ headers: headers });
+
+    var data = {
+        user_id : 1,
+        bus_line_id: this.bus.id
+      };
+
+
+
+    this.http.post("https://ahiviene.herokuapp.com/api/users/on_bus", JSON.stringify(data), options).subscribe(
+          data => {
+                console.log(data);
+                let alert = this.alertCtrl.create({
+                title: 'Te subiste al ' + this.bus.name,
+                subTitle: 'Estas compartiendo la ubicacion a la comunidad, no olvides avisar cuando te bajes.',
+                buttons: [
+                  {
+                    text: 'OK',
+                    handler: () => {
+                      this.storage.set('busName', this.bus.name);
+                    }
+                  }
+                  ]
+              });
+            alert.present();
+            },
+          err => {
+                 console.log(err);
+           }
+        ); 
   }
 
 }
