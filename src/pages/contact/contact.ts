@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
+
 
 @Component({
   selector: 'page-contact',
@@ -7,8 +9,13 @@ import { NavController } from 'ionic-angular';
 })
 export class ContactPage {
 
-  constructor(public navCtrl: NavController) {
+  id: any;
+  constructor(public navCtrl: NavController, public storage: Storage) {
 
+  }
+
+  cambiarId() {
+    this.storage.set('userId', this.id);
   }
 
 }

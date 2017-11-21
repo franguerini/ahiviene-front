@@ -28,16 +28,16 @@ export class HomePage {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
-
-
-    setInterval( () => {
+    this.storage.get('userId').then((id) => {
+      setInterval( () => {
       this.geolocation.getCurrentPosition().then((position) => {
 
         var data = {
-          id : 1,
+          id : id,
           lat : position.coords.latitude,
           lng: position.coords.longitude,
         };
+        console.log(data);
 
         this.http.post("https://ahiviene.herokuapp.com/api/users/update", JSON.stringify(data), options).subscribe(
           data => {
@@ -50,7 +50,10 @@ export class HomePage {
       }, (err) => {
         console.log(err);
       }); 
-    }, 300000);
+    }, 30000);
+    });
+
+    
 
   }
  
@@ -61,12 +64,18 @@ export class HomePage {
 
   ionViewWillEnter(){
 
+    this.http.get("http://ahiviene.herokuapp.com/api/buses").subscribe(
+                (data: Response) => {
+                  console.log(JSON.parse(data['_body']));
+                }
+            );
+
      this.storage.get('busName').then((value) => {
         if(value) {
           this.busName = value.toString();
           let marker = new google.maps.Marker({
             position: this.latLng,
-            label: this.busName
+            label: this.busName,
           });
           marker.setMap(this.map);
           this.markers.push(marker);
@@ -108,26 +117,26 @@ export class HomePage {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
 
-    var data = {
-        user_id : 1,
-      };
+    this.storage.get('userId').then((id) => {
 
-    this.http.post("https://ahiviene.herokuapp.com/api/users/off_bus", JSON.stringify(data), options).subscribe(
-              data => {
-                    console.log(data);
-                     this.busName = 'A pie';
+      var data = {
+          user_id : id,
+        };
 
-                    this.storage.set('busName', this.busName).then( () => {
-                      this.ionViewWillEnter();
-                    });
-                },
-              err => {
-                     console.log(err);
-               }
-            ); 
+      this.http.post("https://ahiviene.herokuapp.com/api/users/off_bus", JSON.stringify(data), options).subscribe(
+                data => {
+                      console.log(data);
+                       this.busName = 'A pie';
 
-   
-
+                      this.storage.set('busName', this.busName).then( () => {
+                        this.ionViewWillEnter();
+                      });
+                  },
+                err => {
+                       console.log(err);
+                 }
+              );
+     });
 
   }
  
