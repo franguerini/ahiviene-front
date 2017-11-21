@@ -37,7 +37,6 @@ export class HomePage {
           lat : position.coords.latitude,
           lng: position.coords.longitude,
         };
-        console.log(data);
 
         this.http.post("https://ahiviene.herokuapp.com/api/users/update", JSON.stringify(data), options).subscribe(
           data => {
@@ -64,24 +63,34 @@ export class HomePage {
 
   ionViewWillEnter(){
 
+    this.deleteMarkers();
+
     this.http.get("http://ahiviene.herokuapp.com/api/buses").subscribe(
                 (data: Response) => {
-                  console.log(JSON.parse(data['_body']));
+                  let buses = JSON.parse(data['_body']);
+                  let i = 0;
+                  for (i = 0; i < buses.length; i++) {
+                     let latLng = new google.maps.LatLng(buses[i].lat, buses[i].lng);
+                     let marker = new google.maps.Marker({
+                      position: latLng,
+                      label: buses[i].name
+                    });
+                    marker.setMap(this.map);
+                    this.markers.push(marker);
+                  }
+                     this.storage.get('busName').then((value) => {
+                  if(value) {
+                    this.busName = value.toString();
+                    let marker = new google.maps.Marker({
+                      position: this.latLng
+                    });
+                    marker.setIcon('http://maps.google.com/mapfiles/marker_green.png');
+                    marker.setMap(this.map);
+                    this.markers.push(marker);
+                  }
+                });
                 }
             );
-
-     this.storage.get('busName').then((value) => {
-        if(value) {
-          this.busName = value.toString();
-          let marker = new google.maps.Marker({
-            position: this.latLng,
-            label: this.busName,
-          });
-          marker.setMap(this.map);
-          this.markers.push(marker);
-        }
-      });
-
     
   }
  
