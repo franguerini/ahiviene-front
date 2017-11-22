@@ -22,6 +22,7 @@ export class HomePage {
   busName: any;
   latLng: any;
   markers: any = [];
+  userId: any = 1;
  
   constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public http: Http) {
 
@@ -29,6 +30,7 @@ export class HomePage {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     this.storage.get('userId').then((id) => {
+      this.userId = id;
       setInterval( () => {
       this.geolocation.getCurrentPosition().then((position) => {
 
@@ -61,11 +63,19 @@ export class HomePage {
     this.loadMap();
   }
 
+  ionViewWillEnter() {
+    this.storage.get('busName').then((value) => {
+      if(value) {
+        this.busName = value.toString();
+      }
+    });
+  }
+
   resetMarkers(position){
 
     this.deleteMarkers();
 
-    this.http.get("http://ahiviene.herokuapp.com/api/buses").subscribe(
+    this.http.get("http://ahiviene.herokuapp.com/api/buses?user_id=" + this.userId.toString()).subscribe(
                 (data) => {
                   let buses = JSON.parse(data['_body']);
                   let i = 0;
@@ -138,8 +148,7 @@ export class HomePage {
                       console.log(data);
                        this.busName = 'A pie';
 
-                      this.storage.set('busName', this.busName).then( () => {
-                      });
+                      this.storage.set('busName', this.busName);
                   },
                 err => {
                        console.log(err);

@@ -1,13 +1,13 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Mapa
+      Mapa (User {{this.userId}})
     </ion-title>
   </ion-navbar>
 </ion-header>
  
 <ion-content>
   <div #map id="map"></div> 
-  <button ion-button (click)="getOffBus()" *ngIf="this.busName != 'A pie'" style="position: absolute; bottom: 0;left: 5%">Viajando en el {{ this.busName }}, presione para bajarse</button>
+  <button ion-button (click)="getOffBus()" *ngIf="this.busName != 'A pie'" style="position: absolute; bottom: 0;">Viajando en el {{ this.busName }}, presione para bajarse</button>
 
 </ion-content>
