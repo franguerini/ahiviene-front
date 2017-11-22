@@ -40,6 +40,7 @@ export class HomePage {
 
         this.http.post("https://ahiviene.herokuapp.com/api/users/update", JSON.stringify(data), options).subscribe(
           data => {
+                this.resetMarkers(position);
                 console.log(data);
             },
           err => {
@@ -60,35 +61,35 @@ export class HomePage {
     this.loadMap();
   }
 
-
-  ionViewWillEnter(){
+  resetMarkers(position){
 
     this.deleteMarkers();
 
     this.http.get("http://ahiviene.herokuapp.com/api/buses").subscribe(
-                (data: Response) => {
+                (data) => {
                   let buses = JSON.parse(data['_body']);
                   let i = 0;
                   for (i = 0; i < buses.length; i++) {
-                     let latLng = new google.maps.LatLng(buses[i].lat, buses[i].lng);
+                     let latLngBus = new google.maps.LatLng(buses[i].lat, buses[i].lng);
                      let marker = new google.maps.Marker({
-                      position: latLng,
-                      label: buses[i].name
-                    });
+                        position: latLngBus,
+                        label: buses[i].name
+                      });
                     marker.setMap(this.map);
                     this.markers.push(marker);
                   }
-                     this.storage.get('busName').then((value) => {
-                  if(value) {
-                    this.busName = value.toString();
-                    let marker = new google.maps.Marker({
-                      position: this.latLng
-                    });
+                  this.storage.get('busName').then((value) => {
+                    if(value) {
+                      let latLngUser = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                      this.busName = value.toString();
+                      let marker = new google.maps.Marker({
+                        position: latLngUser
+                      });
                     marker.setIcon('http://maps.google.com/mapfiles/marker_green.png');
                     marker.setMap(this.map);
                     this.markers.push(marker);
-                  }
-                });
+                   }
+                  });
                 }
             );
     
@@ -112,7 +113,7 @@ export class HomePage {
 
       this.storage.set('busName', this.busName);
 
-      this.ionViewWillEnter();
+      this.resetMarkers(position);
  
     }, (err) => {
       console.log(err);
@@ -138,7 +139,6 @@ export class HomePage {
                        this.busName = 'A pie';
 
                       this.storage.set('busName', this.busName).then( () => {
-                        this.ionViewWillEnter();
                       });
                   },
                 err => {

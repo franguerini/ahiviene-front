@@ -1,18 +1,11 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
 import { Storage } from '@ionic/storage';
+import { Geolocation } from '@ionic-native/geolocation';
+
 
 import { Http , RequestOptions} from '@angular/http';
 import {Headers} from '@angular/http';
-
-
-
-/**
- * Generated class for the BusPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -22,7 +15,7 @@ import {Headers} from '@angular/http';
 export class BusPage {
 
   bus: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public storage: Storage, public http: Http) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public storage: Storage, public http: Http, public geolocation: Geolocation) {
   	this.bus = navParams.get('bus');
   }
 
@@ -35,35 +28,39 @@ export class BusPage {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         let options = new RequestOptions({ headers: headers });
+        
+        this.geolocation.getCurrentPosition().then((position) => {
 
-        var data = {
-            user_id : id,
-            bus_line_id: this.bus.id
-          };
+          var data = {
+              user_id : id,
+              bus_line_id: this.bus.id,
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
 
 
-
-        this.http.post("https://ahiviene.herokuapp.com/api/users/on_bus", JSON.stringify(data), options).subscribe(
-              data => {
-                    console.log(data);
-                    let alert = this.alertCtrl.create({
-                    title: 'Te subiste al ' + this.bus.name,
-                    subTitle: 'Estas compartiendo la ubicacion a la comunidad, no olvides avisar cuando te bajes.',
-                    buttons: [
-                      {
-                        text: 'OK',
-                        handler: () => {
-                          this.storage.set('busName', this.bus.name);
+          this.http.post("https://ahiviene.herokuapp.com/api/users/on_bus", JSON.stringify(data), options).subscribe(
+                data => {
+                      console.log(data);
+                      let alert = this.alertCtrl.create({
+                      title: 'Te subiste al ' + this.bus.name,
+                      subTitle: 'Estas compartiendo la ubicacion a la comunidad, no olvides avisar cuando te bajes.',
+                      buttons: [
+                        {
+                          text: 'OK',
+                          handler: () => {
+                            this.storage.set('busName', this.bus.name);
+                          }
                         }
-                      }
-                      ]
-                  });
-                alert.present();
-                },
-              err => {
-                  console.log(err);
-               }
-            ); 
+                        ]
+                    });
+                  alert.present();
+                  },
+                err => {
+                    console.log(err);
+                 }
+              ); 
+        });
       });
-  }
+    }
 }
