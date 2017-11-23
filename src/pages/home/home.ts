@@ -29,8 +29,16 @@ export class HomePage {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
+
+
+
     this.storage.get('userId').then((id) => {
-      this.userId = id;
+      if(!id) {
+        this.userId = 1;
+        this.storage.set('userId', this.userId);
+      } else {
+        this.userId = id; 
+      }
       this.http.get("http://ahiviene.herokuapp.com/api/users/me" , {params: {id: this.userId.toString()}}).subscribe(
                 (data) => {
                   let userInfo = JSON.parse(data['_body']);
@@ -84,35 +92,38 @@ export class HomePage {
 
     this.deleteMarkers();
 
-    this.http.get("http://ahiviene.herokuapp.com/api/buses?user_id=" + this.userId.toString()).subscribe(
-                (data) => {
-                  let buses = JSON.parse(data['_body']);
-                  let i = 0;
-                  
-                  for (i = 0; i < buses.length; i++) {
-                     let latLngBus = new google.maps.LatLng(buses[i].lat, buses[i].lng);
-                     let marker = new google.maps.Marker({
-                        position: latLngBus,
-                        label: buses[i].name
-                      });
-                    marker.setMap(this.map);
-                    this.markers.push(marker);
-                  }
+    if(this.userId) {
+        this.http.get("http://ahiviene.herokuapp.com/api/buses?user_id=" + this.userId.toString()).subscribe(
+                    (data) => {
+                      let buses = JSON.parse(data['_body']);
+                      let i = 0;
+                      
+                      for (i = 0; i < buses.length; i++) {
+                         let latLngBus = new google.maps.LatLng(buses[i].lat, buses[i].lng);
+                         let marker = new google.maps.Marker({
+                            position: latLngBus,
+                            label: buses[i].name
+                          });
+                        marker.setMap(this.map);
+                        this.markers.push(marker);
+                      }
 
 
-                  this.storage.get('busName').then((value) => {
-                  if(value) {
-                    let latLngUser = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                    this.busName = value.toString();
-                    let userMarker = new google.maps.Marker({
-                      position: latLngUser
+                      this.storage.get('busName').then((value) => {
+                      if(value) {
+                        let latLngUser = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        this.busName = value.toString();
+                        let userMarker = new google.maps.Marker({
+                          position: latLngUser
+                        });
+                      userMarker.setIcon('http://maps.google.com/mapfiles/marker_green.png');
+                      userMarker.setMap(this.map);
+                      this.markers.push(userMarker);
+                     }
                     });
-                  userMarker.setIcon('http://maps.google.com/mapfiles/marker_green.png');
-                  userMarker.setMap(this.map);
-                  this.markers.push(userMarker);
-                 }
-                });
-              });
+                  });      
+    }
+
   }
  
   loadMap(){
