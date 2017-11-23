@@ -1,9 +1,9 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, AlertController } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Storage } from '@ionic/storage';
 import { Http , RequestOptions} from '@angular/http';
-import {Headers} from '@angular/http';
+import { Headers } from '@angular/http';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 
@@ -24,38 +24,47 @@ export class HomePage {
   markers: any = [];
   userId: any = 1;
  
-  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public http: Http) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public alertCtrl: AlertController, public http: Http) {
 
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
     this.storage.get('userId').then((id) => {
       this.userId = id;
-      setInterval( () => {
-      this.geolocation.getCurrentPosition().then((position) => {
+      this.http.get("http://ahiviene.herokuapp.com/api/users/me" , {params: {id: this.userId.toString()}}).subscribe(
+                (data) => {
+                  let userInfo = JSON.parse(data['_body']);
+                  this.busName = userInfo.bus_line_name;
+                  this.storage.set('busName', this.busName);
 
-        var data = {
-          id : id,
-          lat : position.coords.latitude,
-          lng: position.coords.longitude,
-        };
+                   setInterval( () => {
+                    this.geolocation.getCurrentPosition().then((position) => {
 
-        this.http.post("https://ahiviene.herokuapp.com/api/users/update", JSON.stringify(data), options).subscribe(
-          data => {
-                this.resetMarkers(position);
-                console.log(data);
-            },
-          err => {
-                 console.log(err);
-           }
-        );
-      }, (err) => {
-        console.log(err);
-      }); 
-    }, 30000);
-    });
+                    var data = {
+                      id : id,
+                      lat : position.coords.latitude,
+                      lng: position.coords.longitude,
+                    };
 
+                    this.http.post("https://ahiviene.herokuapp.com/api/users/update", JSON.stringify(data), options).subscribe(
+                      data => {
+                            this.resetMarkers(position);
+                            console.log(data);
+                        },
+                      err => {
+                             console.log(err);
+                       }
+                    );
+                  }, (err) => {
+                    console.log(err);
+                  }); 
+                }, 20000);
+                });
+                }
+              );
     
+     
+
 
   }
  
@@ -79,6 +88,7 @@ export class HomePage {
                 (data) => {
                   let buses = JSON.parse(data['_body']);
                   let i = 0;
+                  
                   for (i = 0; i < buses.length; i++) {
                      let latLngBus = new google.maps.LatLng(buses[i].lat, buses[i].lng);
                      let marker = new google.maps.Marker({
@@ -88,21 +98,21 @@ export class HomePage {
                     marker.setMap(this.map);
                     this.markers.push(marker);
                   }
+
+
                   this.storage.get('busName').then((value) => {
-                    if(value) {
-                      let latLngUser = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                      this.busName = value.toString();
-                      let marker = new google.maps.Marker({
-                        position: latLngUser
-                      });
-                    marker.setIcon('http://maps.google.com/mapfiles/marker_green.png');
-                    marker.setMap(this.map);
-                    this.markers.push(marker);
-                   }
-                  });
-                }
-            );
-    
+                  if(value) {
+                    let latLngUser = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    this.busName = value.toString();
+                    let userMarker = new google.maps.Marker({
+                      position: latLngUser
+                    });
+                  userMarker.setIcon('http://maps.google.com/mapfiles/marker_green.png');
+                  userMarker.setMap(this.map);
+                  this.markers.push(userMarker);
+                 }
+                });
+              });
   }
  
   loadMap(){
@@ -145,8 +155,17 @@ export class HomePage {
 
       this.http.post("https://ahiviene.herokuapp.com/api/users/off_bus", JSON.stringify(data), options).subscribe(
                 data => {
-                      console.log(data);
-                       this.busName = 'A pie';
+                     let alert = this.alertCtrl.create({
+                      title: 'Te bajaste del ' + this.busName,
+                      subTitle: 'Gracias por colaborar con tu ubicacion con la comunidad! Hasta la proxima!',
+                       buttons: [
+                          {
+                           text: 'OK',
+                          }
+                        ]
+                      });
+                      alert.present();
+                      this.busName = 'A pie';
 
                       this.storage.set('busName', this.busName);
                   },
