@@ -15,8 +15,10 @@ import {Headers} from '@angular/http';
 export class BusPage {
 
   bus: any;
+  busId: any;
   constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public storage: Storage, public http: Http, public geolocation: Geolocation) {
-  	this.bus = navParams.get('bus');
+    this.bus = navParams.get('bus');
+  	this.busId = navParams.get('busId');
   }
 
 
@@ -31,12 +33,25 @@ export class BusPage {
         
         this.geolocation.getCurrentPosition().then((position) => {
 
-          var data = {
-              user_id : id,
-              bus_line_id: this.bus.id,
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
+          var data = {};
+
+          if(this.busId){
+             data = {
+                user_id : id,
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                bus_id: this.busId,
+                bus_line_id: this.bus.bus_line_id
+
+              };
+          } else {
+            data = {
+                user_id : id,
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                bus_line_id: this.bus.id
+              };
+          }
 
 
           this.http.post("https://ahiviene.herokuapp.com/api/users/on_bus", JSON.stringify(data), options).subscribe(

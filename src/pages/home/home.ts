@@ -4,6 +4,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { Storage } from '@ionic/storage';
 import { Http , RequestOptions} from '@angular/http';
 import { Headers } from '@angular/http';
+import { BusPage } from '../bus/bus';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 
@@ -22,7 +23,8 @@ export class HomePage {
   busName: any;
   latLng: any;
   markers: any = [];
-  userId: any = 1;
+  userId: any = 8;
+  busId: any;
  
   constructor(public navCtrl: NavController, public navParams: NavParams, public geolocation: Geolocation, public storage: Storage, public alertCtrl: AlertController, public http: Http) {
 
@@ -30,11 +32,9 @@ export class HomePage {
     headers.append('Content-Type', 'application/json');
     let options = new RequestOptions({ headers: headers });
 
-
-
     this.storage.get('userId').then((id) => {
       if(!id) {
-        this.userId = 1;
+        this.userId = 8;
         this.storage.set('userId', this.userId);
       } else {
         this.userId = id; 
@@ -56,8 +56,8 @@ export class HomePage {
 
                     this.http.post("https://ahiviene.herokuapp.com/api/users/update", JSON.stringify(data), options).subscribe(
                       data => {
-                            this.resetMarkers(position);
                             console.log(data);
+                            this.resetMarkers(position);
                         },
                       err => {
                              console.log(err);
@@ -66,14 +66,11 @@ export class HomePage {
                   }, (err) => {
                     console.log(err);
                   }); 
-                }, 20000);
+                }, 10000);
                 });
                 }
               );
     
-     
-
-
   }
  
   ionViewDidLoad(){
@@ -92,6 +89,8 @@ export class HomePage {
 
     this.deleteMarkers();
 
+    const nav = this.navCtrl;
+
     if(this.userId) {
         this.http.get("http://ahiviene.herokuapp.com/api/buses?user_id=" + this.userId.toString()).subscribe(
                     (data) => {
@@ -99,11 +98,22 @@ export class HomePage {
                       let i = 0;
                       
                       for (i = 0; i < buses.length; i++) {
+                        let bus = buses[i];
                          let latLngBus = new google.maps.LatLng(buses[i].lat, buses[i].lng);
+                         console.log(latLngBus);
                          let marker = new google.maps.Marker({
                             position: latLngBus,
                             label: buses[i].name
                           });
+                        marker.addListener('click', function() {
+                          console.log(bus);
+                           nav.push(BusPage, {
+                             busId: bus.id,
+                             bus: bus
+                            });
+                         });
+
+
                         marker.setMap(this.map);
                         this.markers.push(marker);
                       }
